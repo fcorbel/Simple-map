@@ -9,15 +9,17 @@ int main(int argc, char* argv[])
 	google::InitGoogleLogging(argv[0]);
 	LOG(INFO) << "Program started";
 	
-	Game *myGame = new Game();
-	myGame->loadOptions();
-	myGame->initialize();
+	Game *my_game = new Game();
+	my_game->loadOptions();
+	my_game->initialize();
 	
-	while (myGame->isRunning()) {	
-		myGame->update();
+	while (my_game->isRunning()) {	
+		LOG(INFO) << "Updating game";
+		my_game->update();
 	}
 	
-	delete myGame;
+	delete my_game;
 
+	LOG(INFO) << "Program stoped";
 	return 0;
 }
