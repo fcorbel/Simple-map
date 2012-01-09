@@ -12,7 +12,7 @@ class Voxel
 		
 		std::string getType();
 	
-	private:
+	protected:
 		std::string type;
 };
 

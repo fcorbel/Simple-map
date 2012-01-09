@@ -59,8 +59,8 @@ bool Game::initialize()
 	quit_event = EventManager::subscribe("quitGame", this, &Game::shutdown);
 	running = true;
 	//load map
-	voxel_map = new VoxelMap(10, 10, 10);
-	voxel_map->writeToFile("my_first_map.txt");
+	createNewMap(3,3,3);
+	saveMap("my_first_map.txt");
 	return true;
 }
 
@@ -84,4 +84,37 @@ void Game::update()
 	EventManager::Arguments arg;
 	arg["pressed"] = false;
 	EventManager::sendEvent("quitGame", arg);
+}
+
+void Game::createNewMap(int x, int y, int z)
+{
+	if (voxel_map) {
+		delete voxel_map;
+	}
+	voxel_map = new VoxelMap(x, y, z);
+	voxel_map->setAllVoxels<VoxelColored>(0x000000);
+	
+	setVoxelColor(1,1,1, 0xff0000);
+}
+
+void Game::setVoxelColor(int x, int y, int z, int color)
+{
+	VoxelColored *vox = (VoxelColored*)(voxel_map->getVoxel(x,y,z));
+	vox->setColor(color);
+	EventManager::Arguments arg;
+	arg["x"] = x;
+	arg["y"] = y;
+	arg["z"] = z;
+	EventManager::sendEvent("mapUpdated", arg);
+}
+
+bool Game::saveMap(std::string filename)
+{
+	return voxel_map->writeToFile(filename);
+}
+
+bool Game::loadMap(std::string filename)
+{
+	//TODO
+	return true;
 }

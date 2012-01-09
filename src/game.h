@@ -6,6 +6,9 @@
 #include "options.h"
 #include "eventManager.h"
 #include "voxelmap.h"
+#include "voxelfactory.h"
+#include "voxelcolored.h"
+
 
 class Game
 {
@@ -18,7 +21,13 @@ class Game
 		void shutdown(std::string, EventManager::Arguments);
 		bool isRunning();
 		void update();
-
+		
+		void createNewMap(int, int, int);
+		void setVoxelColor(int, int, int, int);
+		bool saveMap(std::string);
+		bool loadMap(std::string);
+		
+		
 	private:
 		bool running;
 		Options *config;
