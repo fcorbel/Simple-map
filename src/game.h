@@ -5,9 +5,11 @@
 #include <string>
 #include "options.h"
 #include "eventManager.h"
-#include "voxelmap.h"
-#include "voxelfactory.h"
-#include "voxelcolored.h"
+#include "voxelMap.h"
+#include "voxelFactory.h"
+#include "voxelColored.h"
+#include "graphics/graphicsOgre.h"
+#include "input/oisInput.h"
 
 
 class Game
@@ -32,10 +34,12 @@ class Game
 		bool running;
 		Options *config;
 		Options *keymap;
-		VoxelMap *voxel_map;
+		VoxelMap *voxelMap;
+		GraphicsOgre *graphics;
+		OIS_input *input;
 
 		//variables to manage unsubscribe of events
-		int quit_event;
+		int quitEvent;
 };
 
 #endif

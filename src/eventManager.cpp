@@ -9,8 +9,8 @@ bool EventManager::unSubscribe(int id)
 	//not perf efficient
 	std::multimap<std::string, Callback>::iterator it;
 	for (it = registered_cbks.begin(); it != registered_cbks.end(); ++it) {
-			LOG(INFO) << it->second.id;
 		if (it->second.id == id) {
+				LOG(INFO) << "Unsubscribe listener with ID = " << id;
 				registered_cbks.erase(it);
 		}
 	}
@@ -20,7 +20,7 @@ bool EventManager::unSubscribe(int id)
 
 void EventManager::sendEvent(std::string event_name, Arguments args)
 {
-	//LOG(INFO) << "received event: " << event_name;
+	LOG(INFO) << "received event: " << event_name;
 	MyEvent ev;
 	ev.event_name = event_name;
 	ev.args = args; 
@@ -39,17 +39,20 @@ void EventManager::sendEventSync(std::string event_name, Arguments args)
 
 void EventManager::processEvents ()
 {
-	while (!event_queue.empty()) {
-		LOG(INFO) << "Processing some events in queue";
-		std::pair<ListRegisteredCbks::iterator, ListRegisteredCbks::iterator> it;
-		it = registered_cbks.equal_range(event_queue.front().event_name);
-		for (ListRegisteredCbks::iterator it2 = it.first; it2 != it.second; ++it2) {
-			LOG(INFO) << "Call a matching method for event: " << "\"" << event_queue.front().event_name << "\"";
-			it2->second.method(it2->first, event_queue.front().args);
+	if (!event_queue.empty()) {
+		LOG(INFO) << "================ Start processing events ================";
+		while (!event_queue.empty()) {
+			std::pair<ListRegisteredCbks::iterator, ListRegisteredCbks::iterator> it;
+			it = registered_cbks.equal_range(event_queue.front().event_name);
+			LOG(INFO) << "Processing some events in queue: " << event_queue.front().event_name;
+			for (ListRegisteredCbks::iterator it2 = it.first; it2 != it.second; ++it2) {
+				LOG(INFO) << "Call a matching method for event: " << "\"" << event_queue.front().event_name << "\"";
+				it2->second.method(it2->first, event_queue.front().args);
+			}
+			event_queue.pop();
 		}
-		event_queue.pop();
+		LOG(INFO) << "================ All events processed ================";
 	}
-	//~ LOG(INFO) << "All events processed";
 }
 
 void EventManager::listListeners()

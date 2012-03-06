@@ -94,13 +94,15 @@ set(HDRS
 	./src/game.h
 	./src/options.h
 	./src/eventManager.h
-	./src/voxelmap.h
+	./src/voxelMap.h
 	./src/voxel.h
-	./src/input/ois_input.h
-	./src/graphics/graphics_ogre.h
+	./src/voxelColored.h
+	./src/voxelFactory.h
+	./src/graphics/graphicsOgre.h
+	./src/graphics/editorScene.h
 	./src/graphics/camera.h
-	./src/graphics/cube.h
-	./src/graphics/scene.h
+	#~ ./src/graphics/guiSystem.h	
+	./src/input/oisInput.h
 )
  
 set(SRCS
@@ -108,13 +110,15 @@ set(SRCS
 	./src/game.cpp
 	./src/options.cpp
 	./src/eventManager.cpp
-	./src/voxelmap.cpp
+	./src/voxelMap.cpp
 	./src/voxel.cpp
-	./src/input/ois_input.cpp
-	./src/graphics/graphics_ogre.cpp
+	./src/voxelColored.cpp
+	./src/voxelFactory.cpp
+	./src/graphics/graphicsOgre.cpp
+	./src/graphics/editorScene.cpp
 	./src/graphics/camera.cpp
-	./src/graphics/cube.cpp
-	./src/graphics/scene.cpp
+	#~ ./src/graphics/guiSystem.cpp
+	./src/input/oisInput.cpp
 )
  
 include_directories( ${OIS_INCLUDE_DIRS}

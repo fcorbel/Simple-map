@@ -5,17 +5,24 @@ Game::Game()
 	running = false;
 	config = NULL;
 	keymap = NULL;
-	voxel_map = NULL;
+	voxelMap = NULL;
+	graphics = NULL;
 }
 
 Game::~Game()
 {
-	EventManager::unSubscribe(quit_event);
+	EventManager::unSubscribe(quitEvent);
 	
 	LOG(INFO) << "Writing configuration file";
 	config->writeToFile("config.cfg");
-	if (voxel_map) {
-		delete voxel_map;
+	if (voxelMap) {
+		delete voxelMap;
+	}
+	if (input) {
+		delete input;
+	}
+	if (graphics) {
+		delete graphics;
 	}
 	if (keymap) {
 		delete keymap;
@@ -40,11 +47,15 @@ bool Game::loadOptions()
 	//load keymap options
 	std::map<std::string, std::string> defaults_keymap;
 	defaults_keymap["Escape"] = "quitGame";
+	defaults_keymap["c"] = "changeBackColour";
 	//for the camera movements
 	defaults_keymap["Up"] = "moveForward";
 	defaults_keymap["Down"] = "moveBackward";
 	defaults_keymap["Left"] = "moveLeft";
 	defaults_keymap["Right"] = "moveRight";
+	//for the GUI
+	defaults_keymap["Mb_Right"] = "rightClick";
+	defaults_keymap["Mb_Left"] = "leftClick";
 
 	keymap = new Options(defaults_keymap);
 	
@@ -56,11 +67,21 @@ bool Game::initialize()
 	config->showOptions();
 	keymap->showOptions();
 	
-	quit_event = EventManager::subscribe("quitGame", this, &Game::shutdown);
+	quitEvent = EventManager::subscribe("quitGame", this, &Game::shutdown);
 	running = true;
+	
+	//start GUI (Ogre engine)
+	graphics = new GraphicsOgre();
+	graphics->initOgre(config);
+	//start input (OIS)
+	input = new OIS_input();
+	input->initializeWithOgre(graphics->getWindowAttribute());
+	input->setKeymap(keymap);
+	
 	//load map
 	createNewMap(3,3,3);
 	saveMap("my_first_map.txt");
+	graphics->getScene()->setMap(voxelMap);
 	return true;
 }
 
@@ -79,27 +100,30 @@ bool Game::isRunning()
 void Game::update()
 {
 	//~ LOG(INFO) << "Updating game";
+	input->capture();
 	EventManager::processEvents();
-	
-	EventManager::Arguments arg;
-	arg["pressed"] = false;
-	EventManager::sendEvent("quitGame", arg);
-}
+	graphics->renderFrame();
+	}
 
 void Game::createNewMap(int x, int y, int z)
 {
-	if (voxel_map) {
-		delete voxel_map;
+	if (voxelMap) {
+		delete voxelMap;
 	}
-	voxel_map = new VoxelMap(x, y, z);
-	voxel_map->setAllVoxels<VoxelColored>(0x000000);
+	voxelMap = new VoxelMap(x, y, z);
+	//~ voxelMap->setAllVoxels<VoxelColored>(0x000000);
+	EventManager::Arguments arg;
+	EventManager::sendEvent("mapUpdated", arg);
+
 	
-	setVoxelColor(1,1,1, 0xff0000);
+	//~ setVoxelColor(1,1,1, 0xff0000);
+	//~ setVoxelColor(1,0,1, 0xff0000);
+
 }
 
 void Game::setVoxelColor(int x, int y, int z, int color)
 {
-	VoxelColored *vox = (VoxelColored*)(voxel_map->getVoxel(x,y,z));
+	VoxelColored *vox = (VoxelColored*)(voxelMap->getVoxel(x,y,z));
 	vox->setColor(color);
 	EventManager::Arguments arg;
 	arg["x"] = x;
@@ -110,7 +134,7 @@ void Game::setVoxelColor(int x, int y, int z, int color)
 
 bool Game::saveMap(std::string filename)
 {
-	return voxel_map->writeToFile(filename);
+	return voxelMap->writeToFile(filename);
 }
 
 bool Game::loadMap(std::string filename)
