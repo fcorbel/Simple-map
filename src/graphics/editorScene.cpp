@@ -120,10 +120,10 @@ void EditorScene::setMap(VoxelMap *_voxelMap)
 	for (int i=0; i<voxelMap->getSizeX(); ++i) {
 		for (int j=0; j<voxelMap->getSizeY(); ++j) {
 			for (int k=0; k<voxelMap->getSizeZ(); ++k) {
-				Ogre::SceneNode *newNode = mapMainNode->createChildSceneNode(Ogre::StringConverter::toString(i) + Ogre::StringConverter::toString(j) + Ogre::StringConverter::toString(k));
+				Ogre::SceneNode *newNode = mapMainNode->createChildSceneNode(Ogre::StringConverter::toString(i) + "-" + Ogre::StringConverter::toString(j) + "-" + Ogre::StringConverter::toString(k));
 				newNode->setPosition(i*cubeSize, j*cubeSize, k*cubeSize);
 				//create the mouse selection marker
-				Ogre::Entity *ent = sceneMgr->createEntity(Ogre::StringConverter::toString(i) + Ogre::StringConverter::toString(j) + Ogre::StringConverter::toString(k) + "_marker", "meshSelectionMarker");
+				Ogre::Entity *ent = sceneMgr->createEntity(Ogre::StringConverter::toString(i) + "-" + Ogre::StringConverter::toString(j) + "-" + Ogre::StringConverter::toString(k) + "_marker", "meshSelectionMarker");
 				ent->setVisible(false);
 				newNode->attachObject(ent);
 			}
@@ -144,7 +144,7 @@ void EditorScene::setMap(VoxelMap *_voxelMap)
 		for (int i=0; i<=voxelMap->getSizeZ(); ++i) {
 			editorAxis->position(0.0f, 0.0f, cubeSize*i);
 			editorAxis->colour(Ogre::ColourValue::Red);			
-			editorAxis->position(cubeSize*voxelMap->getSizeZ(), 0.0f, cubeSize*i);
+			editorAxis->position(cubeSize*voxelMap->getSizeX(), 0.0f, cubeSize*i);
 			editorAxis->colour(Ogre::ColourValue::Red);
 		}
 		//vertices from plane Y
@@ -211,7 +211,7 @@ void EditorScene::loadMap()
 						//~ newCube->getSubEntity(0)->getMaterial()->getTechnique(0)->getPass(0)->setSelfIllumination(1, 1, 0);
 						//~ newCube->getSubEntity(0)->getMaterial()->getTechnique(0)->getPass(0)->setLightingEnabled(true);
 
-						sceneMgr->getSceneNode(Ogre::StringConverter::toString(i) + Ogre::StringConverter::toString(j) + Ogre::StringConverter::toString(k))->attachObject(newCube);
+						sceneMgr->getSceneNode(Ogre::StringConverter::toString(i) + "-" + Ogre::StringConverter::toString(j) + "-" + Ogre::StringConverter::toString(k))->attachObject(newCube);
 					} else {
 						LOG(WARNING) << "Unknown voxel in the map: don't know how to draw";
 					}
@@ -233,20 +233,22 @@ void EditorScene::updateMap(std::string eventName, EventManager::Arguments args)
 		int y = boost::any_cast<int>(args["y"]);
 		int z = boost::any_cast<int>(args["z"]);
 		LOG(INFO) << "Updating representatgion of pixel at: " << x << " " << y << " " << z;
-		Ogre::SceneNode *node = sceneMgr->getSceneNode(Ogre::StringConverter::toString(x) + Ogre::StringConverter::toString(y) + Ogre::StringConverter::toString(z));
+		Ogre::SceneNode *node = sceneMgr->getSceneNode(Ogre::StringConverter::toString(x) + "-" + Ogre::StringConverter::toString(y) + "-" + Ogre::StringConverter::toString(z));
 		if (voxelMap->getVoxel(x,y,z)) {
 			//have to create a new cube
 			if (node->numAttachedObjects() > 1) { //if there is an entity attached (other than the selection marker)
-				Ogre::Entity *entity = (Ogre::Entity*)node->getAttachedObject(0);
+				//~ Ogre::Entity *entity = (Ogre::Entity*)node->getAttachedObject(1);
+				Ogre::Entity *entity = (Ogre::Entity*)node->getAttachedObject(Ogre::StringConverter::toString(x) + "-" + Ogre::StringConverter::toString(y) + "-" + Ogre::StringConverter::toString(z) + "_cube");
+				LOG(INFO) << "Trying to destroy entity named: " << entity->getName();
 				node->detachObject(entity);
 				sceneMgr->destroyEntity(entity);
 			}
-			Ogre::Entity *newCube = sceneMgr->createEntity(Ogre::StringConverter::toString(x) + Ogre::StringConverter::toString(y) + Ogre::StringConverter::toString(z) + "_cube", "meshCube");
+			Ogre::Entity *newCube = sceneMgr->createEntity(Ogre::StringConverter::toString(x) + "-" + Ogre::StringConverter::toString(y) + "-" + Ogre::StringConverter::toString(z) + "_cube", "meshCube");
 			node->attachObject(newCube);
 		} else {
 			//the pixel have been deleted
 			if (node->numAttachedObjects() > 1) { //if there is an entity attached (other than the selection marker)
-				Ogre::Entity *entity = (Ogre::Entity*)node->getAttachedObject(0);
+				Ogre::Entity *entity = (Ogre::Entity*)node->getAttachedObject(Ogre::StringConverter::toString(x) + "-" + Ogre::StringConverter::toString(y) + "-" + Ogre::StringConverter::toString(z) + "_cube");
 				node->detachObject(entity);
 				sceneMgr->destroyEntity(entity);
 			}
@@ -311,10 +313,11 @@ GuiSystem::GuiSystem(EditorScene *_scene, Ogre::RenderWindow *window, Ogre::Scen
 	EventManager::subscribe("rightClick", this, &GuiSystem::moveMap);
 	EventManager::subscribe("mouseMoved", this, &GuiSystem::checkSelection);
 	EventManager::subscribe("leftClick", this, &GuiSystem::modifyCube);
+	EventManager::subscribe("setClearMode", this, &GuiSystem::changeEditMode);
 
 	MyGUI::ButtonPtr button = myGUI->findWidget<MyGUI::Button>("bt_exit");
 	button->eventMouseButtonClick = MyGUI::newDelegate(this, &GuiSystem::exitRequested);
-	LOG(INFO) << "GUI successfukky initialized";
+	LOG(INFO) << "GUI successfully initialized";
 }
 
 GuiSystem::~GuiSystem()
@@ -408,19 +411,11 @@ void GuiSystem::modifyCube(std::string eventName, EventManager::Arguments args)
 			if (isClearMode) {
 				//clear cube
 				if (scene->getSceneMgr()->hasEntity(selectedNode->getName() + "_cube")) {
-					scene->getVoxelMap()->deleteVoxel(selectedNode->getName());	
+					Coordinates coord = stringToCoordinates(selectedNode->getName());
+					scene->getVoxelMap()->deleteVoxel(coord.x, coord.y, coord.z);	
 				}
 			} else {
-				//new/modify cube TODO SHiTTY if name longer than xyz, ex: xxyyzzz ???? plein de trucs zarb
-				//~ LOG(INFO) << "x=" << selectedNode->getName()[0] << " y=" << selectedNode->getName()[1] << " z=" << selectedNode->getName()[2];
-				//~ char xc = selectedNode->getName()[0];
-				//~ char yc = selectedNode->getName()[1];
-				//~ char zc = selectedNode->getName()[2];
-				//~ 
-				//~ int x = atoi(&xc);
-				//~ int y = atoi(&yc);
-				//~ int z = atoi(&zc);
-				//~ LOG(INFO) << "x=" << x << " y=" << y << " z=" << z;
+				//new/modify cube
 				Coordinates coord = stringToCoordinates(selectedNode->getName());
 				VoxelColored *vox = new VoxelColored(22);
 				scene->getVoxelMap()->setVoxel(vox, coord.x, coord.y, coord.z);
@@ -433,9 +428,41 @@ Coordinates GuiSystem::stringToCoordinates(std::string coordString)
 {
 	Coordinates coord;
 	
-	coord.x = 1;
-	coord.y = 1;
-	coord.z = 1;
+	size_t found;
+	int posFirstDash;
+	int posSecondDash;
+
+	//get position of the first "-"
+	found = coordString.find('-');
+	if (found == std::string::npos) {
+		LOG(ERROR) << "string not correctly formated: " << coordString;
+	}
+	posFirstDash = int(found);
+	//get position of the second "-"
+	found = coordString.find('-', posFirstDash+1);
+	if (found == std::string::npos) {
+		LOG(ERROR) << "string not correctly formated: " << coordString;
+	}
+	posSecondDash = int(found);
+	if (coordString.find('_') != std::string::npos) {
+		LOG(ERROR) << "This format of string is not supported: " << coordString;
+	}
 	
+	std::istringstream strX(coordString.substr(0, posFirstDash));
+	std::istringstream strY(coordString.substr(posFirstDash+1, posSecondDash));
+	std::istringstream strZ(coordString.substr(posSecondDash+1));	
+	strX >> coord.x;
+	strY >> coord.y;
+	strZ >> coord.z;
+	LOG(INFO) << "Coordonates converted from string: x= " << coord.x << " y= " << coord.y << " z= " << coord.z;
 	return coord;
 } 
+
+void GuiSystem::changeEditMode(std::string eventName, EventManager::Arguments args)
+{
+	if (boost::any_cast<bool>(args["pressed"])) {
+		isClearMode = true;
+	} else {
+		isClearMode = false;
+	}
+}

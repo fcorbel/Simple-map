@@ -11,6 +11,7 @@ Game::Game()
 
 Game::~Game()
 {
+	saveMap("my_first_map2.txt");
 	EventManager::unSubscribe(quitEvent);
 	
 	LOG(INFO) << "Writing configuration file";
@@ -56,6 +57,8 @@ bool Game::loadOptions()
 	//for the GUI
 	defaults_keymap["Mb_Right"] = "rightClick";
 	defaults_keymap["Mb_Left"] = "leftClick";
+	defaults_keymap["Control_L"] = "setClearMode";
+	defaults_keymap["Control_R"] = "setClearMode";
 
 	keymap = new Options(defaults_keymap);
 	
@@ -80,7 +83,6 @@ bool Game::initialize()
 	
 	//load map
 	createNewMap(3,3,3);
-	saveMap("my_first_map.txt");
 	graphics->getScene()->setMap(voxelMap);
 	return true;
 }
@@ -110,7 +112,8 @@ void Game::createNewMap(int x, int y, int z)
 	if (voxelMap) {
 		delete voxelMap;
 	}
-	voxelMap = new VoxelMap(x, y, z);
+	voxelMap = new VoxelMap("my_first_map.txt");
+	//~ voxelMap = new VoxelMap(x, y, z);
 	//~ voxelMap->setAllVoxels<VoxelColored>(0x000000);
 	EventManager::Arguments arg;
 	EventManager::sendEvent("mapUpdated", arg);

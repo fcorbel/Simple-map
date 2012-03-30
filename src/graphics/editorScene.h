@@ -30,6 +30,7 @@ class GuiSystem
 	private:	
 		void checkSelection(std::string, EventManager::Arguments);		
 		void modifyCube(std::string, EventManager::Arguments);
+		void changeEditMode(std::string, EventManager::Arguments);
 
 		bool isClearMode;
 		Ogre::SceneNode *selectedNode;
