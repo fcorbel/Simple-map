@@ -6,6 +6,7 @@
 #include "OGRE/Ogre.h"
 #include "../voxelMap.h"
 #include "camera.h"
+#include "sidepanel.h"
 #include <MYGUI/MyGUI.h>
 #include <MYGUI/MyGUI_OgrePlatform.h>
 
@@ -31,14 +32,15 @@ class GuiSystem
 		void checkSelection(std::string, EventManager::Arguments);		
 		void modifyCube(std::string, EventManager::Arguments);
 		void changeEditMode(std::string, EventManager::Arguments);
-
+		
 		bool isClearMode;
 		Ogre::SceneNode *selectedNode;
 		EditorScene *scene;
 		MyGUI::Gui *myGUI;
 		MyGUI::OgrePlatform* mPlatform;
 		bool moveMapMode;
-		
+		//pointers to widgets
+		SidePanel* sidePanel;
 };
 
 class EditorScene
@@ -54,8 +56,6 @@ class EditorScene
 		Camera* getCamera() { return camera; };
 		Ogre::SceneManager* getSceneMgr() { return sceneMgr; };
 		VoxelMap* getVoxelMap() { return voxelMap; };
-		//GUI
-		void clearRequested(MyGUI::WidgetPtr sender);
 
 	private:
 		//~ void loadGUI(Ogre::RenderWindow* window);

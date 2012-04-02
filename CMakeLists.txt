@@ -101,6 +101,7 @@ set(HDRS
 	./src/graphics/graphicsOgre.h
 	./src/graphics/editorScene.h
 	./src/graphics/camera.h
+	./src/graphics/sidepanel.h
 	./src/input/oisInput.h
 )
  
@@ -116,6 +117,7 @@ set(SRCS
 	./src/graphics/graphicsOgre.cpp
 	./src/graphics/editorScene.cpp
 	./src/graphics/camera.cpp
+	./src/graphics/sidepanel.cpp
 	./src/input/oisInput.cpp
 )
  

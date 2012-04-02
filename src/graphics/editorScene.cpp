@@ -273,24 +273,6 @@ void EditorScene::update(unsigned long timeLapsed)
 	rotX = 0;
 }
 
-//~ void EditorScene::loadGUI(Ogre::RenderWindow* window)
-//~ {	
-	//~ button = myGUI->findWidget<MyGUI::Button>("bt_clear");
-	//~ button->eventMouseButtonClick = MyGUI::newDelegate(this, &EditorScene::clearRequested);
-//~ 
-//~ 
-
-//~ 
-//~ }
-
-//~ void EditorScene::clearRequested(MyGUI::WidgetPtr sender)
-//~ {
-	//~ //If there is a cube selected and if not void, destroy it
-	//~ LOG(INFO) << "Trying to clear a cube";
-//	voxelMap->deleteVoxel(0,0,0);
-//~ 
-//~ }
-
 GuiSystem::GuiSystem(EditorScene *_scene, Ogre::RenderWindow *window, Ogre::SceneManager *sceneMgr):
 	moveMapMode(false),
 	scene(_scene),	
@@ -302,26 +284,30 @@ GuiSystem::GuiSystem(EditorScene *_scene, Ogre::RenderWindow *window, Ogre::Scen
 	mPlatform->initialise(window, sceneMgr);
 	myGUI = new MyGUI::Gui();	
 	myGUI->initialise();
-		
-	MyGUI::Gui::getInstance().load("colour_slider_skin.xml");
-	MyGUI::LayoutManager::getInstance().loadLayout("gui.xml");
-
+	
 	EventManager::subscribe("mouseMoved", this, &GuiSystem::myGuiUpdate);
 	EventManager::subscribe("mousePressed", this, &GuiSystem::myGuiUpdate);
 	EventManager::subscribe("mouseReleased", this, &GuiSystem::myGuiUpdate);
+	EventManager::subscribe("keyPressed", this, &GuiSystem::myGuiUpdate);
+	EventManager::subscribe("keyReleased", this, &GuiSystem::myGuiUpdate);
 	EventManager::subscribe("mouseMoved", this, &GuiSystem::moveMap);
 	EventManager::subscribe("rightClick", this, &GuiSystem::moveMap);
 	EventManager::subscribe("mouseMoved", this, &GuiSystem::checkSelection);
 	EventManager::subscribe("leftClick", this, &GuiSystem::modifyCube);
 	EventManager::subscribe("setClearMode", this, &GuiSystem::changeEditMode);
 
-	MyGUI::ButtonPtr button = myGUI->findWidget<MyGUI::Button>("bt_exit");
-	button->eventMouseButtonClick = MyGUI::newDelegate(this, &GuiSystem::exitRequested);
+	//Initialize MyGUI widgets
+	sidePanel = new SidePanel(myGUI);
+	
+	//~ MyGUI::ButtonPtr button = myGUI->findWidget<MyGUI::Button>("bt_exit");
+	//~ button->eventMouseButtonClick = MyGUI::newDelegate(this, &GuiSystem::exitRequested);
+	
 	LOG(INFO) << "GUI successfully initialized";
 }
 
 GuiSystem::~GuiSystem()
 {
+	delete sidePanel;
 	myGUI->shutdown();
 	delete myGUI;
 	myGUI = 0;
@@ -333,13 +319,20 @@ GuiSystem::~GuiSystem()
 void GuiSystem::myGuiUpdate(std::string eventName, EventManager::Arguments args)
 {
 	//TODO add other events
-	LOG(INFO) << "Updating GUI state";
+	//~ LOG(INFO) << "Updating GUI state";
 	if (eventName == "mouseMoved") {
 		MyGUI::InputManager::getInstance().injectMouseMove(boost::any_cast<int>(args["Xabs"]), boost::any_cast<int>(args["Yabs"]), boost::any_cast<int>(args["Zabs"]));
 	} else if (eventName == "mousePressed") {
 		MyGUI::InputManager::getInstance().injectMousePress(boost::any_cast<int>(args["Xabs"]), boost::any_cast<int>(args["Yabs"]), MyGUI::MouseButton::Enum(boost::any_cast<int>(args["id"])));
 	} else if (eventName == "mouseReleased") {
 		MyGUI::InputManager::getInstance().injectMouseRelease(boost::any_cast<int>(args["Xabs"]), boost::any_cast<int>(args["Yabs"]), MyGUI::MouseButton::Enum(boost::any_cast<int>(args["id"])));
+	} else if (eventName == "keyPressed") {
+		MyGUI::KeyCode key = MyGUI::KeyCode::Enum(boost::any_cast<int>(args["key"]));
+		MyGUI::Char text = (MyGUI::Char)boost::any_cast<unsigned int>(args["text"]);
+		MyGUI::InputManager::getInstance().injectKeyPress(key, text);
+	} else if (eventName == "keyReleased") {
+		MyGUI::KeyCode key = MyGUI::KeyCode::Enum(boost::any_cast<int>(args["key"]));
+		MyGUI::InputManager::getInstance().injectKeyRelease(key);
 	}
 }
 

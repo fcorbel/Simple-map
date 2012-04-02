@@ -80,7 +80,7 @@ void OIS_input::capture()
 }
 
 bool OIS_input::keyPressed(const OIS::KeyEvent &evt)
-{	
+{
 	std::string key_name;
 	key_name = ((OIS::Keyboard*)(evt.device))->getAsString(evt.key);
 	LOG(INFO) << "key pressed: " << key_name;	
@@ -90,8 +90,13 @@ bool OIS_input::keyPressed(const OIS::KeyEvent &evt)
 		EventManager::Arguments arg;
 		arg["pressed"] = true;
 		EventManager::sendEvent(message, arg);
+	} else {
+		EventManager::Arguments arg;
+		arg["key"] = (int)evt.key;
+		arg["text"] = evt.text;
+		std::string message("keyPressed");
+		EventManager::sendEvent(message, arg);		
 	}
-
 	return true;
 }
 
@@ -106,6 +111,12 @@ bool OIS_input::keyReleased(const OIS::KeyEvent &evt)
 		EventManager::Arguments arg;
 		arg["pressed"] = false;
 		EventManager::sendEvent(message, arg);
+	} else {
+		EventManager::Arguments arg;
+		arg["key"] = (int)evt.key;
+		arg["text"] = evt.text;
+		std::string message("keyReleased");
+		EventManager::sendEvent(message, arg);		
 	}
 
 	return true;
