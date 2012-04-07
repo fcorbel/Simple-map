@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+
+	<Widget type="Button" skin="Button" position="10 10 200 50" align="Default" layer="Main" name="bt_exit">
+		<Property key="Widget_Caption" value="Exit"/>
+	</Widget>
+	
+	<Widget type="Window" skin="WindowC" position="10 80 300 500" layer="Overlapped" name="mainPanel">
+        <Property key="Widget_Caption" value="Tools"/>
+        <Property key="Window_MinSize" value="200 150"/>
+<!--
+        <Widget type="ScrollView" skin="ScrollView" position="2 2 200 504" align="Stretch" name="scrollView">
+            <Property key="ScrollView_VisibleHScroll" value="false"/>
+        </Widget>
+-->
+
+		<Widget type="Widget" skin="PanelSmall" position="2 2 262 262">
+            <Widget type="StaticImage" skin="StaticImage" position="2 2 262 262" name="widget_ColourRect">
+                <Widget type="StaticImage" skin="StaticImage" position="0 0 16 16" name="image_Picker">
+                    <Property key="Image_Texture" value="Pick.png"/>
+                    <Property key="Image_Coord" value="0 0 16 16"/>
+                    <Property key="Image_Tile" value="16 16"/>
+                    <Property key="Image_Index" value="0"/>
+                </Widget>
+            </Widget>
+        </Widget>
+
+		<Widget type="Widget" skin="PanelSmall" position="266 2 22 262">
+            <Widget type="VScroll" skin="VColourSlider" position="2 2 16 256" name="scroll_Range">
+                <Property key="Scroll_Range" value="512"/>
+                <Property key="Scroll_Position" value="0"/>
+                <Property key="Scroll_Page" value="1"/>
+                <Property key="Scroll_ViewPage" value="32"/>
+            </Widget>
+        </Widget>
+        
+        <Widget type="StaticText" skin="StaticText" position="2 270 20 26">
+            <Property key="Widget_Caption" value="R :"/>
+            <Property key="Text_TextAlign" value="Right VCenter"/>
+        </Widget>
+        <Widget type="Edit" skin="Edit" position="26 270 56 26" name="edit_Red">
+            <Property key="Widget_Caption" value="255"/>
+            <Property key="Text_TextAlign" value="Center"/>
+            <Property key="Edit_MaxTextLength" value="3"/>
+        </Widget>
+        <Widget type="StaticText" skin="StaticText" position="84 270 20 26">
+            <Property key="Text_TextAlign" value="Right VCenter"/>
+            <Property key="Widget_Caption" value="G :"/>
+        </Widget>
+        <Widget type="Edit" skin="Edit" position="108 270 56 26" name="edit_Green">
+            <Property key="Text_TextAlign" value="Center"/>
+            <Property key="Widget_Caption" value="255"/>
+            <Property key="Edit_MaxTextLength" value="3"/>
+        </Widget>
+        <Widget type="StaticText" skin="StaticText" position="168 270 20 26">
+            <Property key="Text_TextAlign" value="Right VCenter"/>
+            <Property key="Widget_Caption" value="B :"/>
+        </Widget>
+        <Widget type="Edit" skin="Edit" position="192 270 56 26" name="edit_Blue">
+            <Property key="Edit_CursorPosition" value="0"/>
+            <Property key="Widget_Caption" value="255"/>
+            <Property key="Text_TextAlign" value="Center"/>
+            <Property key="Edit_MaxTextLength" value="3"/>
+        </Widget>
+        <Widget type="StaticText" skin="StaticText" position="2 298 36 26">
+            <Property key="Text_TextAlign" value="Right VCenter"/>
+            <Property key="Widget_Caption" value="Hex :"/>
+        </Widget>
+        <Widget type="Edit" skin="Edit" position="42 298 56 26" name="edit_Hex">
+            <Property key="Widget_Caption" value="FFFFFF"/>
+            <Property key="Text_TextAlign" value="Center"/>
+            <Property key="Edit_MaxTextLength" value="6"/>
+        </Widget>
+        <Widget type="Widget" skin="PanelSmall" position="110 298 100 26">
+            <Widget type="Widget" skin="MarkerWhite" position="2 2 94 20" name="widget_ColourView"/>
+        </Widget>
+		<Widget type="Button" skin="Button" position="212 298 50 26" align="Default" layer="Main" name="bt_clear_mode">
+			<Property key="Widget_Caption" value="Clear mode (Ctrl)"/>
+		</Widget>
+
+
+    </Widget>
+	
+<!--
+	
+	<Widget type="Window" skin="WindowC" position="88 184 264 200" layer="Overlapped" name="_Main">
+        <Property key="Widget_Caption" value="Control panel"/>
+        <Widget type="Button" skin="CheckBox" position="4 9 244 31" layer="Back" name="Busy">
+            <Property key="Widget_Caption" value="Busy context (High level) - F1"/>
+            <UserString key="Context" value="ptrx_Busy"/>
+        </Widget>
+        <Widget type="Button" skin="RadioBox" position="4 41 244 31" layer="Back" name="Repair">
+            <Property key="Widget_Caption" value="Repair context - F2"/>
+            <UserString key="Context" value="ptrx_Repair"/>
+        </Widget>
+        <Widget type="Button" skin="RadioBox" position="4 73 244 31" layer="Back" name="Attack">
+            <Property key="Widget_Caption" value="Attack context - F3"/>
+            <UserString key="Context" value="ptrx_Attack"/>
+        </Widget>
+        <Widget type="Widget" skin="PanelSmall" position="4 105 248 56" layer="Back" name="PanelPointer">
+            <Property key="Widget_Pointer" value="hand"/>
+            <Widget type="StaticText" skin="StaticText" position="0 0 248 56" layer="Back">
+                <Property key="Text_TextAlign" value="Center"/>
+                <Property key="Widget_Caption" value="&apos;hand&apos; pointer"/>
+                <Property key="Widget_NeedMouse" value="false"/>
+            </Widget>
+        </Widget>
+    </Widget>
+-->
+
+</MyGUI>
