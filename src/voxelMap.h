@@ -22,9 +22,9 @@ class VoxelMap
 		void setVoxel(Voxel*, int, int, int);
 		template<typename T> void setAllVoxels(int color)
 		{
-			for (int i=0; i<_x; ++i) {
-				for (int j=0; j<_y; ++j) {
-					for (int k=0; k<_z; ++k) {
+			for (int i=0; i<x_; ++i) {
+				for (int j=0; j<y_; ++j) {
+					for (int k=0; k<z_; ++k) {
 						//WRN arg is just for VoxelColored, not clean
 						if (map[i][j][k]) {
 							delete map[i][j][k];
@@ -37,19 +37,20 @@ class VoxelMap
 			EventManager::sendEvent("mapUpdated", arg);
 		}
 		void deleteVoxel(int, int, int);
-		int getSizeX() { return _x; }
-		int getSizeY() { return _y; }
-		int getSizeZ() { return _z; }
+		int getSizeX() { return x_; }
+		int getSizeY() { return y_; }
+		int getSizeZ() { return z_; }
 
 		bool writeToFile(std::string filename);
 
 	private:
 		std::vector< std::vector< std::vector< Voxel* > > > map;
-		int _x;
-		int _y;
-		int _z;
+		int x_;
+		int y_;
+		int z_;
 		bool rangeCorrect(int, int, int);
 		bool resize(int, int, int);
+		bool hexStringToFloat(std::string hexString, float &red, float &green, float &blue);
 
 };
 

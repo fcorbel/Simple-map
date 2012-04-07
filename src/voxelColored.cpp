@@ -1,9 +1,11 @@
 #include "voxelColored.h"
 
 
-VoxelColored::VoxelColored(int _hexColor)
-	: Voxel(),
-	hexColor(_hexColor)
+VoxelColored::VoxelColored(float red, float green, float blue):
+	Voxel(),
+	red_(red),
+	green_(green),
+	blue_(blue)
 {
 	type = "colored";
 }
@@ -13,12 +15,15 @@ VoxelColored::~VoxelColored()
 
 }
 
-int VoxelColored::getColor()
+int VoxelColored::getColorAsHex()
 {
-	return hexColor;
+	//TODO do the conversion float->hex
+	return 777777;
 }
 
-void VoxelColored::setColor(int _hexColor)
+void VoxelColored::setColor(float red, float green, float blue)
 {
-	hexColor = _hexColor;	
+	red_ = red;
+	green_ = green;
+	blue_ = blue;
 }

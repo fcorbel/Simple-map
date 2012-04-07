@@ -5,9 +5,9 @@ EditorScene::EditorScene(Ogre::Root* ogre, Ogre::RenderWindow* window):
 	cubeSize(50.0f),
 	rotX(0),
 	rotY(0),
-	selectedColour(0),
 	gui(NULL)
 {
+	
 	LOG(INFO) << "== Initialization of the scene ==";
 	sceneMgr = ogre->createSceneManager(Ogre::ST_GENERIC);
 	mapPitchNode = sceneMgr->getRootSceneNode()->createChildSceneNode();
@@ -100,7 +100,7 @@ EditorScene::EditorScene(Ogre::Root* ogre, Ogre::RenderWindow* window):
 	selectionMarker->convertToMesh("meshSelectionMarker");
 
 	
-	EventManager::subscribe("mapUpdated", this, &EditorScene::updateMap);
+	EventManager::subscribe("mapUpdated", this, &EditorScene::updateMap);	
 }
 
 EditorScene::~EditorScene()
@@ -186,32 +186,25 @@ void EditorScene::loadMap()
 	for (int i=0; i<voxelMap->getSizeX(); ++i) {
 		for (int j=0; j<voxelMap->getSizeY(); ++j) {
 			for (int k=0; k<voxelMap->getSizeZ(); ++k) {
+				//delete the previous mesh
+				Ogre::SceneNode *node = sceneMgr->getSceneNode(Ogre::StringConverter::toString(i) + "-" + Ogre::StringConverter::toString(j) + "-" + Ogre::StringConverter::toString(k));			
+				if (node->numAttachedObjects() > 1) { //if there is an entity attached (other than the selection marker)
+					Ogre::Entity *entity = (Ogre::Entity*)node->getAttachedObject(Ogre::StringConverter::toString(i) + "-" + Ogre::StringConverter::toString(j) + "-" + Ogre::StringConverter::toString(k) + "_cube");
+					LOG(INFO) << "Trying to destroy entity named: " << entity->getName();
+					node->detachObject(entity);
+					sceneMgr->destroyEntity(entity);
+				}
+
 				if (voxelMap->getVoxel(i,j,k)) {
 					VoxelColored *vox = (VoxelColored*)voxelMap->getVoxel(i,j,k);
 					if (vox->getType() == "colored") {
 						//create a cube of the right color, attach it to his node
-						LOG(INFO) << "Create new entity for cube at position: [" << i << "," << j << "," << k << "]"; 
-						Ogre::Entity *newCube = sceneMgr->createEntity("meshCube");
-						//set the right color for the cube
-						//TODO
-						//~ newCube->getSubEntity(0)->setMaterialName("test");
-						LOG(INFO) << "===========================" << newCube;
-						LOG(INFO) << "===========================" << newCube->getSubEntity(0)->getMaterial()->getTechnique(0)->getNumPasses();
-						//~ Ogre::TextureUnitState *texState = newCube->getSubEntity(0)->getMaterial()->getTechnique(0)->getPass(0)->createTextureUnitState();
+						Colour cubeColour;
+						cubeColour.red = vox->getRed();
+						cubeColour.green = vox->getGreen();
+						cubeColour.blue = vox->getBlue();
 						
-						//~ newCube->getSubEntity(0)->getMaterial()->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setColourOperationEx(
-							//~ Ogre::LBX_SOURCE1,
-							//~ Ogre::LBS_MANUAL,
-							//~ Ogre::LBS_CURRENT,
-							//~ Ogre::ColourValue(1.0, 0.0, 1.0));
-						//~ newCube->getSubEntity(0)->getMaterial()->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setColourOpMultipassFallback(
-							//~ Ogre::SBF_ONE,
-							//~ Ogre::SBF_ZERO);
-						//~ newCube->getSubEntity(0)->getMaterial()->getTechnique(0)->getPass(0)->setAmbient(0, 1, 1);
-						//~ newCube->getSubEntity(0)->getMaterial()->getTechnique(0)->getPass(0)->setSelfIllumination(1, 1, 0);
-						//~ newCube->getSubEntity(0)->getMaterial()->getTechnique(0)->getPass(0)->setLightingEnabled(true);
-
-						sceneMgr->getSceneNode(Ogre::StringConverter::toString(i) + "-" + Ogre::StringConverter::toString(j) + "-" + Ogre::StringConverter::toString(k))->attachObject(newCube);
+						createCube(i, j, k, cubeColour);						
 					} else {
 						LOG(WARNING) << "Unknown voxel in the map: don't know how to draw";
 					}
@@ -237,14 +230,12 @@ void EditorScene::updateMap(std::string eventName, EventManager::Arguments args)
 		if (voxelMap->getVoxel(x,y,z)) {
 			//have to create a new cube
 			if (node->numAttachedObjects() > 1) { //if there is an entity attached (other than the selection marker)
-				//~ Ogre::Entity *entity = (Ogre::Entity*)node->getAttachedObject(1);
 				Ogre::Entity *entity = (Ogre::Entity*)node->getAttachedObject(Ogre::StringConverter::toString(x) + "-" + Ogre::StringConverter::toString(y) + "-" + Ogre::StringConverter::toString(z) + "_cube");
 				LOG(INFO) << "Trying to destroy entity named: " << entity->getName();
 				node->detachObject(entity);
 				sceneMgr->destroyEntity(entity);
 			}
-			Ogre::Entity *newCube = sceneMgr->createEntity(Ogre::StringConverter::toString(x) + "-" + Ogre::StringConverter::toString(y) + "-" + Ogre::StringConverter::toString(z) + "_cube", "meshCube");
-			node->attachObject(newCube);
+			createCube(x, y, z, gui->getSelectedColour());
 		} else {
 			//the pixel have been deleted
 			if (node->numAttachedObjects() > 1) { //if there is an entity attached (other than the selection marker)
@@ -273,6 +264,33 @@ void EditorScene::update(unsigned long timeLapsed)
 	rotX = 0;
 }
 
+void EditorScene::createCube(int x, int y, int z, Colour colour)
+{
+	LOG(INFO) << "Create new entity for cube at position: [" << x << "," << y << "," << z << "] colour: r" << colour.red << "g" << colour.green << "b" << colour.blue; 
+	Ogre::Entity *newCube = sceneMgr->createEntity(Ogre::StringConverter::toString(x) + "-" + Ogre::StringConverter::toString(y) + "-" + Ogre::StringConverter::toString(z) + "_cube", "meshCube");
+	//set the right color for the cube
+	//TODO
+	newCube->getSubEntity(0)->setMaterialName("basic");
+	LOG(INFO) << "===========================" << newCube;
+	LOG(INFO) << "===========================" << newCube->getSubEntity(0)->getMaterial()->getTechnique(0)->getNumPasses();
+	//~ Ogre::TextureUnitState *texState = newCube->getSubEntity(0)->getMaterial()->getTechnique(0)->getPass(0)->createTextureUnitState();
+	
+	//~ newCube->getSubEntity(0)->getMaterial()->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setColourOperationEx(
+		//~ Ogre::LBX_SOURCE1,
+		//~ Ogre::LBS_MANUAL,
+		//~ Ogre::LBS_CURRENT,
+		//~ Ogre::ColourValue(1.0, 0.0, 1.0));
+	//~ newCube->getSubEntity(0)->getMaterial()->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setColourOpMultipassFallback(
+		//~ Ogre::SBF_ONE,
+		//~ Ogre::SBF_ZERO);
+	//~ newCube->getSubEntity(0)->getMaterial()->getTechnique(0)->getPass(0)->setAmbient(0, 1, 1);
+	//~ newCube->getSubEntity(0)->getMaterial()->getTechnique(0)->getPass(0)->setSelfIllumination(1, 1, 0);
+	//~ newCube->getSubEntity(0)->getMaterial()->getTechnique(0)->getPass(0)->setLightingEnabled(true);
+	
+	sceneMgr->getSceneNode(Ogre::StringConverter::toString(x) + "-" + Ogre::StringConverter::toString(y) + "-" + Ogre::StringConverter::toString(z))->attachObject(newCube);
+
+}
+
 GuiSystem::GuiSystem(EditorScene *_scene, Ogre::RenderWindow *window, Ogre::SceneManager *sceneMgr):
 	moveMapMode(false),
 	scene(_scene),	
@@ -284,6 +302,10 @@ GuiSystem::GuiSystem(EditorScene *_scene, Ogre::RenderWindow *window, Ogre::Scen
 	mPlatform->initialise(window, sceneMgr);
 	myGUI = new MyGUI::Gui();	
 	myGUI->initialise();
+	selectedColour.red = 0.0;
+	selectedColour.green = 0.0;
+	selectedColour.blue = 0.0;
+	
 	
 	EventManager::subscribe("mouseMoved", this, &GuiSystem::myGuiUpdate);
 	EventManager::subscribe("mousePressed", this, &GuiSystem::myGuiUpdate);
@@ -295,6 +317,7 @@ GuiSystem::GuiSystem(EditorScene *_scene, Ogre::RenderWindow *window, Ogre::Scen
 	EventManager::subscribe("mouseMoved", this, &GuiSystem::checkSelection);
 	EventManager::subscribe("leftClick", this, &GuiSystem::modifyCube);
 	EventManager::subscribe("setClearMode", this, &GuiSystem::changeEditMode);
+	EventManager::subscribe("newColourSelected", this, &GuiSystem::updateColour);
 
 	//Initialize MyGUI widgets
 	sidePanel = new SidePanel(myGUI);
@@ -342,6 +365,13 @@ void GuiSystem::exitRequested(MyGUI::WidgetPtr sender)
 	EventManager::Arguments arg;
 	arg["pressed"] = false;
 	EventManager::sendEvent("quitGame", arg);
+}
+
+void GuiSystem::updateColour(std::string eventName , EventManager::Arguments args)
+{
+	selectedColour.red = boost::any_cast<float>(args["red"]);
+	selectedColour.green = boost::any_cast<float>(args["green"]);
+	selectedColour.blue = boost::any_cast<float>(args["blue"]);
 }
 
 void GuiSystem::moveMap(std::string eventName, EventManager::Arguments args)
@@ -410,7 +440,7 @@ void GuiSystem::modifyCube(std::string eventName, EventManager::Arguments args)
 			} else {
 				//new/modify cube
 				Coordinates coord = stringToCoordinates(selectedNode->getName());
-				VoxelColored *vox = new VoxelColored(22);
+				VoxelColored *vox = new VoxelColored(selectedColour.red, selectedColour.green, selectedColour.blue);
 				scene->getVoxelMap()->setVoxel(vox, coord.x, coord.y, coord.z);
 			}
 		}

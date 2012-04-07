@@ -3,15 +3,17 @@
 
 #include <glog/logging.h>
 #include <MYGUI/MyGUI.h>
+#include "../eventManager.h"
 
 class SidePanel
-{
+{	
 	public:
 		SidePanel(MyGUI::Gui *myGUI);
 		~SidePanel();
 	
 	private:
 		void notifyEditTextChange(MyGUI::Edit *sender);	
+		bool isValidHexColour(const std::string hex);
 
 		MyGUI::Gui *myGUI_;
 		MyGUI::Colour currentColour;

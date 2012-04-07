@@ -16,7 +16,7 @@ Voxel* VoxelFactory::createVoxel(std::string name)
 	return new Voxel();
 }
 
-Voxel* VoxelFactory::createColoredVoxel(int color)
+Voxel* VoxelFactory::createColoredVoxel(float red, float green, float blue)
 {
-	return new VoxelColored(color);
+	return new VoxelColored(red, green, blue);
 }

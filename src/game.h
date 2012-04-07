@@ -25,7 +25,6 @@ class Game
 		void update();
 		
 		void createNewMap(int, int, int);
-		void setVoxelColor(int, int, int, int);
 		bool saveMap(std::string);
 		bool loadMap(std::string);
 		

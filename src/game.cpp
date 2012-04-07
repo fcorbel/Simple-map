@@ -117,22 +117,6 @@ void Game::createNewMap(int x, int y, int z)
 	//~ voxelMap->setAllVoxels<VoxelColored>(0x000000);
 	EventManager::Arguments arg;
 	EventManager::sendEvent("mapUpdated", arg);
-
-	
-	//~ setVoxelColor(1,1,1, 0xff0000);
-	//~ setVoxelColor(1,0,1, 0xff0000);
-
-}
-
-void Game::setVoxelColor(int x, int y, int z, int color)
-{
-	VoxelColored *vox = (VoxelColored*)(voxelMap->getVoxel(x,y,z));
-	vox->setColor(color);
-	EventManager::Arguments arg;
-	arg["x"] = x;
-	arg["y"] = y;
-	arg["z"] = z;
-	EventManager::sendEvent("mapUpdated", arg);
 }
 
 bool Game::saveMap(std::string filename)

@@ -11,7 +11,7 @@ class VoxelFactory
 		VoxelFactory();
 		static Voxel* createVoxel();
 		static Voxel* createVoxel(std::string name);
-		static Voxel* createColoredVoxel(int color);
+		static Voxel* createColoredVoxel(float red, float green, float blue);
 			
 	private:
 		/* add your private declarations */

@@ -8,14 +8,20 @@
 class VoxelColored: public Voxel
 {
 	public:
-		VoxelColored(int _hexColor);
+		VoxelColored(float red, float green, float blue);
 		~VoxelColored();
-			
-		int getColor();
-		void setColor(int _hexColor);
 
+		int getColorAsHex();
+		void setColor(float red, float green, float blue);
+		float getRed() { return red_; }
+		float getGreen() { return green_; }
+		float getBlue() { return blue_; }
+		
 	private:
-		int hexColor;
+		float red_;
+		float green_;
+		float blue_;
+		
 };
 
 #endif /* VOXEL_COLORED_H */ 

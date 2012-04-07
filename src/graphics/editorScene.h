@@ -17,6 +17,11 @@ struct Coordinates {
 	int z;
 };
 
+struct Colour {
+	float red;
+	float green;
+	float blue;
+};
 
 class GuiSystem
 {
@@ -24,10 +29,12 @@ class GuiSystem
 		GuiSystem(EditorScene *_scene, Ogre::RenderWindow *window, Ogre::SceneManager *sceneMgr);		
 		~GuiSystem();
 
+		void updateColour(std::string, EventManager::Arguments);
 		void myGuiUpdate(std::string eventName, EventManager::Arguments args);
 		void exitRequested(MyGUI::WidgetPtr sender);
 		void moveMap(std::string eventName, EventManager::Arguments args);
 		Coordinates stringToCoordinates(std::string); 
+		Colour getSelectedColour() { return selectedColour; }
 	private:	
 		void checkSelection(std::string, EventManager::Arguments);		
 		void modifyCube(std::string, EventManager::Arguments);
@@ -35,6 +42,7 @@ class GuiSystem
 		
 		bool isClearMode;
 		Ogre::SceneNode *selectedNode;
+		Colour selectedColour;		
 		EditorScene *scene;
 		MyGUI::Gui *myGUI;
 		MyGUI::OgrePlatform* mPlatform;
@@ -58,19 +66,19 @@ class EditorScene
 		VoxelMap* getVoxelMap() { return voxelMap; };
 
 	private:
-		//~ void loadGUI(Ogre::RenderWindow* window);
 		Ogre::SceneManager *sceneMgr;
 		VoxelMap *voxelMap;
 		Ogre::SceneNode *mapMainNode;
 		Camera *camera;
 		float cubeSize;
-		int selectedColour;
 		//GUI
 		GuiSystem *gui;
 		//to move the map
 		Ogre::SceneNode *mapYawNode;
 		Ogre::SceneNode *mapPitchNode;
 		Ogre::Radian rotX, rotY;
+		
+		void createCube(int x, int y, int z, Colour colour);
 };
 
 #endif /* EDITORSCENE_H */ 

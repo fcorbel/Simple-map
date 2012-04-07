@@ -2,9 +2,9 @@
 
 
 VoxelMap::VoxelMap(int x, int y, int z):
-	_x(x),
-	_y(y),
-	_z(z)
+	x_(x),
+	y_(y),
+	z_(z)
 {
 	map.resize(x);
 	std::vector< std::vector< std::vector< Voxel* > > >::iterator xIt;
@@ -95,10 +95,14 @@ VoxelMap::VoxelMap(std::string filename)
 					map[k][i][j] = NULL;
 				} else {
 					LOG(INFO) << "Add a voxel to the map";
-					std::istringstream str(value);
-					int colour;
-					str >> colour;
-					VoxelColored *vox = new VoxelColored(colour);
+					VoxelColored *vox;
+					float r,g,b;
+					if (hexStringToFloat(value, r, g, b)) {
+						vox = new VoxelColored(r, g, b);
+					} else {
+						LOG(WARNING) << "Could not parse value: \"" << value << "\" to valid hex value, creating white voxel.";
+						vox = new VoxelColored(1.0f, 1.0f, 1.0f);
+					}
 					map[k][i][j] = vox;
 				}
 				valueList.pop_front();
@@ -109,9 +113,9 @@ VoxelMap::VoxelMap(std::string filename)
 
 VoxelMap::~VoxelMap()
 {
-	for (int i=0; i<_x; ++i) {
-		for (int j=0; j<_y; ++j) {
-			for (int k=0; k<_z; ++k) {
+	for (int i=0; i<x_; ++i) {
+		for (int j=0; j<y_; ++j) {
+			for (int k=0; k<z_; ++k) {
 				delete map[i][j][k];
 			}
 		}
@@ -131,9 +135,9 @@ bool VoxelMap::resize(int x, int y, int z)
 			yIt->resize(z);
 		}
 	}
-	_x = x;
-	_y = y;
-	_z = z;
+	x_ = x;
+	y_ = y;
+	z_ = z;
 	return true;
 }
 
@@ -184,12 +188,12 @@ bool VoxelMap::writeToFile(std::string filename)
 	std::ofstream file(filename.c_str());
 	if (file.is_open()) {
 		file << "#representation of the voxel map\n#From top to bottom\n#Leave an empty line at the end of file\n";
-		for (int i=_y-1; i>=0; --i) {
-			for (int j=0; j<_z; ++j) {
-				for (int k=0; k<_x; ++k) {		
+		for (int i=y_-1; i>=0; --i) {
+			for (int j=0; j<z_; ++j) {
+				for (int k=0; k<x_; ++k) {		
 					if (map[k][i][j]) {
 						VoxelColored *vox = static_cast<VoxelColored*>(map[k][i][j]);
-						file << vox->getColor() << " ";
+						file << vox->getColorAsHex() << " ";
 					} else {
 						file << "NULL ";
 					}
@@ -198,23 +202,6 @@ bool VoxelMap::writeToFile(std::string filename)
 			}
 			file << "\n";
 		}		
-		
-		
-		//~ for (int i=_z-1; i>-1; --i) {
-			//~ for (int j=0; j<_y; ++j) {
-				//~ for (int k=0; k<_x; ++k) {
-					//~ if (map[k][i][j]) { //TODO segfault here
-						//~ //WRN: ajusted for ColoredVoxel
-						//~ VoxelColored *vox = static_cast<VoxelColored*>(map[k][i][j]);
-						//~ file << vox->getColor() << " ";
-					//~ } else {
-						//~ file << "NULL ";
-					//~ }
-				//~ }
-				//~ file << "\n";
-			//~ }
-			//~ file << "\n";
-		//~ }
 
 		file.close();
 	} else {
@@ -227,10 +214,35 @@ bool VoxelMap::writeToFile(std::string filename)
 
 bool VoxelMap::rangeCorrect(int x, int y, int z)
 {
-	if (x<0 || x>=_x || y<0 || y>=_y || z<0 || z>=_z) {
+	if (x<0 || x>=x_ || y<0 || y>=y_ || z<0 || z>=z_) {
 		LOG(ERROR) << "Trying to access a voxel out of range: " << "x=" << x << "y=" << y << "z=" << z;
 		exit(1);
 		return false;
 	}
+	return true;
+}
+
+bool VoxelMap::hexStringToFloat(std::string hexString, float &red, float &green, float &blue)
+{
+	//check if the string is a valid hex value
+	//TODO
+	
+	//parse values
+	std::string r = hexString.substr(0, 2);
+	std::string g = hexString.substr(2, 2);
+	std::string b = hexString.substr(4, 2);
+	
+	int temp;
+	std::stringstream ss;
+	ss << std::hex << r;
+	ss >> temp;
+	red = (float)temp/255;
+	ss << std::hex << g;
+	ss >> temp;
+	green = (float)temp/255;
+	ss << std::hex << b;
+	ss >> temp;
+	blue = (float)temp/255;
+	//~ LOG(INFO) << "r" << red << "g" << green << "b" << blue;
 	return true;
 }
