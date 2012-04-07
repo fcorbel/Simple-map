@@ -232,17 +232,16 @@ bool VoxelMap::hexStringToFloat(std::string hexString, float &red, float &green,
 	std::string g = hexString.substr(2, 2);
 	std::string b = hexString.substr(4, 2);
 	
-	int temp;
+	int tempR, tempG, tempB;
 	std::stringstream ss;
 	ss << std::hex << r;
-	ss >> temp;
-	red = (float)temp/255;
+	ss >> tempR;
+	red = (float)tempR/255;
 	ss << std::hex << g;
-	ss >> temp;
-	green = (float)temp/255;
+	ss >> tempG;
+	green = (float)tempG/255;
 	ss << std::hex << b;
-	ss >> temp;
-	blue = (float)temp/255;
-	//~ LOG(INFO) << "r" << red << "g" << green << "b" << blue;
+	ss >> tempB;
+	blue = (float)tempB/255;
 	return true;
 }
